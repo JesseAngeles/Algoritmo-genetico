@@ -1,0 +1,1 @@
+./build/main.exe 13 24 8 19 functionSquare
