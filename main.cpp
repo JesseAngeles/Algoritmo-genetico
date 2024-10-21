@@ -1,32 +1,21 @@
 #include <iostream>
 #include <vector>
 #include <set>
-#include <bitset>
 
 #include "Generation.h"
+
+#include "./src/Functions.cpp"
+#include "./src/GeneticCrosses.cpp"
+#include "./src/GeneticMutations.cpp"
 
 #define DEFAULT_SIZE 4
 
 using namespace std;
 
-struct functionEntry
-{
-    string name;
-    int (*func)(int);
-};
-
 // Funciones principales
 vector<int> getInitValues(int, char *[]);
-functionEntry getInitFunction(int argc, char *argv[]);
+tuple<functionEntry, functionGenetic, functionGenetic> getInitFunctions(int argc, char *argv[]);
 vector<int> getValues(vector<element>);
-
-vector<int> geneticCross(vector<int>);
-vector<int> geneticMutation(vector<int>);
-
-// Funciones de aplicacion
-int functionSquare(int x) { return x * x; }
-int functionCube(int x) { return x * x * x; }
-int functionDoble(int x) { return 2 * x; }
 
 // Funciones auxiliares
 bool areEqual(vector<int>);
@@ -37,30 +26,33 @@ int main(int argc, char *argv[])
     set<vector<int>> historial;
 
     vector<int> initValues = getInitValues(argc, argv);
-    functionEntry function = getInitFunction(argc, argv);
+    tuple<functionEntry, functionGenetic, functionGenetic> functions = getInitFunctions(argc, argv);
+    functionEntry function = get<0>(functions);
+    functionGenetic cross = get<1>(functions);
+    functionGenetic mutation = get<2>(functions);
 
     int errorCount = 3;
 
     do
     {
         print(initValues);
-        Generation generation(initValues, function.func);
+        Generation generation(initValues, function.func, cross.func, mutation.func);
         vector<int> values = getValues(generation.getElements());
 
         if (historial.find(values) == historial.end())
         {
             historial.insert(values);
-            initValues = geneticCross(values);
+            initValues = generation.cross(values);
         }
         else if (areEqual(values)) // Son iguales todos
         {
-            if (values[0] == MAX)
+            if (values[0] == MAX) // Son todos los mejores
                 break;
 
-            initValues = geneticMutation(values);
+            initValues = generation.mutation(values);
             cout << "Mutation: \n";
         }
-        else // Ya se encontro esa generación anteriormente{
+        else // Ya se encontro esa generación anteriormente
         {
             errorCount--;
             cout << "Error count: " << errorCount << endl;
@@ -75,7 +67,7 @@ vector<int> getInitValues(int argc, char *argv[])
 
     if (argc > 1)
     { // Los elementos iniciales se obtienen desde la ejecución
-        for (int i = 1; i < argc - 1; i++)
+        for (int i = 1; i < argc; i++)
         { // Excluir el último argumento (nombre de la función)
             string argument = argv[i];
 
@@ -94,31 +86,72 @@ vector<int> getInitValues(int argc, char *argv[])
     else
     {
         for (int i = 0; i < DEFAULT_SIZE; i++)
-        {
             initValues.push_back(rand() % 32);
-        }
     }
 
     return initValues;
 }
 
-functionEntry getInitFunction(int argc, char *argv[])
+tuple<functionEntry, functionGenetic, functionGenetic> getInitFunctions(int argc, char *argv[])
 {
+
     vector<functionEntry> functions = {
         {"functionSquare", functionSquare},
         {"functionCube", functionCube},
         {"functionDoble", functionDoble}};
 
+    vector<functionGenetic> crosses = {
+        {"binarySwitch", geneticCrossBinarySwitch},
+        {"binaryAddition", geneticCrossBinaryAddition}};
+
+    vector<functionGenetic> mutations = {
+        {"randomSwitch", geneticMutationRandomSwitch},
+        {"zeroSwitch", geneticMutationZeroSwitch}};
+
+    functionEntry entry_function = functions[0];
+    functionGenetic cross = crosses[0];
+    functionGenetic mutation = mutations[0];
+
     if (argc > 1)
     {
-        string name_function = argv[argc - 1];
+        vector<string> param_functions;
+        for (int i = 1; i < argc; i++)
+        {
+            string argument = argv[i];
 
-        for (const functionEntry &function : functions)
-            if (function.name == name_function)
-                return function;
+            bool isNumber = true;
+            for (char &c : argument)
+                if (!isdigit(c))
+                {
+                    isNumber = false;
+                    break;
+                }
+
+            if (!isNumber)
+                param_functions.push_back(string(argument));
+        }
+
+        if (param_functions.size() >= 1) // Busca la función correspondiente en `functions`
+        {
+            for (const functionEntry &fun : functions)
+                if (fun.name == param_functions[0])
+                    entry_function = fun;
+
+            if (param_functions.size() >= 2) // Busca la función correspondiente en `crosses`
+            {
+                for (const functionGenetic &fun : crosses)
+                    if (fun.name == param_functions[1])
+                        cross = fun;
+
+                if (param_functions.size() >= 3) // Busca la función correspondiente en `mutations`
+                    for (const functionGenetic &fun : mutations)
+                        if (fun.name == param_functions[2])
+                            mutation = fun;
+            }
+        }
     }
 
-    return functions[0];
+    return make_tuple(entry_function, cross, mutation);
 }
 
 vector<int> getValues(vector<element> elements)
@@ -126,53 +159,6 @@ vector<int> getValues(vector<element> elements)
     vector<int> values;
     for (element element : elements)
         values.push_back(element.value);
-
-    return values;
-}
-
-vector<int> geneticCross(vector<int> values)
-{
-    bitset<5> bestValue(values[0]);
-
-    vector<int> newValues;
-
-    for (int i = 1; i < values.size(); i++)
-    {
-        const int numBits = (2 * i) - 1;
-        bitset<5> binary(values[i]);
-
-        bitset<5> best = bestValue;
-        // swap de valores binarios
-        for (int j = 0; j < numBits; j++)
-        {
-            bool value = binary[j];
-            binary[j] = best[j];
-            best[j] = value;
-        }
-
-        newValues.push_back(int(best.to_ulong()));
-        if (newValues.size() == values.size())
-            break;
-
-        newValues.push_back(int(binary.to_ulong()));
-        if (newValues.size() == values.size())
-            break;
-    }
-
-    return newValues;
-}
-
-vector<int> geneticMutation(vector<int> values)
-{
-    for (int i = values.size() / 2; i < values.size(); i++)
-    {
-        bitset<5> binary(values[i]);
-
-        int pos = rand() % 5;
-        binary[pos] = !binary[pos];
-
-        values[i] = int(binary.to_ulong());
-    }
 
     return values;
 }

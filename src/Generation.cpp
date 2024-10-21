@@ -1,7 +1,9 @@
 #include "Generation.h"
 
 // Constructor
-Generation::Generation(std::vector<int> initValues, int (*function)(int)) : function(function)
+Generation::Generation(std::vector<int> initValues, int (*function)(int),
+                       std::vector<int> (*cross)(std::vector<int>), std::vector<int> (*mutation)(std::vector<int>))
+    : function(function), cross(cross), mutation(mutation)
 {
     for (int &value : initValues)
         if (inRange(value))
@@ -45,7 +47,8 @@ void Generation::calculateCurrentCount()
     this->randomizer = Randomizer(calculateComulativeCount());
 
     // Usa una lambda para invocar el método en un hilo
-    std::thread graphicThread([this]() { insertCurrentCount(true); });
+    std::thread graphicThread([this]()
+                              { insertCurrentCount(true); });
 
     int count = 0;
     while (count < TESTS && graphicThread.joinable())
@@ -70,12 +73,12 @@ std::vector<float> Generation::calculateComulativeCount()
 void Generation::insertCurrentCount(bool graphic)
 {
     int index;
-    if(graphic)
-        index = this->randomizer.graphicRandom();        // Asegúrate de que random() esté bien definido
+    if (graphic)
+        index = this->randomizer.graphicRandom(); // Asegúrate de que random() esté bien definido
     else
         index = this->randomizer.random();
-    
-    std::lock_guard<std::mutex> lock(countMutex);        // Bloqueo automático
+
+    std::lock_guard<std::mutex> lock(countMutex); // Bloqueo automático
     (elements[index].currentCount)++;
 }
 

@@ -26,10 +26,8 @@ class Generation
 private:
     int size;
     std::vector<element> elements;
-
     std::mutex countMutex;
-
-    int (*function)(int);
+    
     int functionTotal;
     float functionAverage;
 
@@ -48,12 +46,14 @@ private:
 
 public:
     // Constructor
-    Generation(std::vector<int>, int (*)(int));
+    Generation(std::vector<int>, int (*)(int), std::vector<int>(*)(std::vector<int>), std::vector<int>(*)(std::vector<int>));
 
     // getters
     std::vector<element> getElements() const { return this->elements; }
 
-    // setters
+    int (*function)(int);
+    std::vector<int>(*cross)(std::vector<int>);
+    std::vector<int>(*mutation)(std::vector<int>);
 
     // impresiones
     void printElements();
