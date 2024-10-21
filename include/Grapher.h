@@ -38,9 +38,10 @@ private:
 public:
     Grapher(int = 250, int = 250, std::string content = "Roulette", Color background = {255, 255, 255});
 
-    void drawText(std::string content, int fontSize, float x, float y, Color color, bool isScaled);
+    void drawText(std::string content, int fontSize, float x, float y, Color color);
+    void drawRectangle(float width, float height, float x, float y, Color color);
     void drawDivisor(float angle);
-    void drawCircle(float x, float y, float radius, Color color, bool isScaled);
+    void drawCircle(float x, float y, float radius, Color color);
     void moveLines(float angle);
     int draw(float factor);
     int getAngle();

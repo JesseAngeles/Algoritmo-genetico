@@ -9,11 +9,12 @@ Grapher::Grapher(int width, int height, std::string name, Color background)
     x_center = width / 2;
     y_center = height / 2;
 
-    drawCircle(x_center, y_center, 100, {250, 0, 0}, false);
+    drawCircle(x_center, y_center, 100, {37, 206, 209});
+    drawRectangle(50, 5, x_center + 95, y_center, {4, 67, 137});
 }
 
 // Dibujar texto
-void Grapher::drawText(std::string content, int fontSize, float x, float y, Color color, bool isScaled)
+void Grapher::drawText(std::string content, int fontSize, float x, float y, Color color)
 {
     Text text;
     text.setFont(this->font);
@@ -23,6 +24,16 @@ void Grapher::drawText(std::string content, int fontSize, float x, float y, Colo
     text.setPosition(x, y);
 
     this->texts.push_back(text);
+}
+
+void Grapher::drawRectangle(float width, float height, float x, float y, Color color)
+{
+    RectangleShape rectangle(Vector2f(width, height));
+    rectangle.setPosition(x, y);
+    rectangle.setOutlineThickness(0);
+    rectangle.setFillColor(color);
+
+    this->rectangles.push_back(rectangle);
 }
 
 void Grapher::drawDivisor(float angle)
@@ -43,7 +54,7 @@ void Grapher::drawDivisor(float angle)
     this->lines.push_back(line);
 }
 
-void ::Grapher::drawCircle(float x, float y, float radius, Color color, bool isScaled)
+void ::Grapher::drawCircle(float x, float y, float radius, Color color)
 {
     CircleShape circle(radius);
     circle.setPosition(x - radius, y - radius);
@@ -103,6 +114,11 @@ int Grapher::draw(float factor)
         if (!lines.empty())
             for (const VertexArray &line : lines)
                 window.draw(line);
+
+        if (!rectangles.empty())
+            for (const RectangleShape &rectangle : rectangles)
+                window.draw(rectangle);
+            
 
         window.display();
     }

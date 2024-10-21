@@ -11,6 +11,16 @@ int Randomizer::random()
 {
     float random_num = FLOAT_MIN + (float)(rand()) / ((float)(RAND_MAX / (FLOAT_MAX - FLOAT_MIN)));
 
+    for (int i = 0; i < classes.size(); i++)
+        if (random_num <= classes[i])
+            return i;
+
+    return 1;
+}
+
+int Randomizer::graphicRandom()
+{
+    
     Grapher grapher;
 
     for (const auto &cls : classes)

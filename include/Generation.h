@@ -5,21 +5,27 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <algorithm>
 
 #include "Randomizer.h"
 
 #define MIN 0
 #define MAX 31
 
-#define COUNT 1
+#define COUNT 10000
+
+struct element
+{
+    int value;
+    float expectedCount;
+    int currentCount;
+};
 
 class Generation
 {
 private:
     int size;
-    std::vector<int> values;
-    std::vector<float> expectedCount;
-    std::vector<int> currentCount;
+    std::vector<element> elements;
 
     std::mutex countMutex;
 
@@ -31,25 +37,26 @@ private:
 
     void calculateAverage();
     void calculateExpectedCount();
+    void calculateCurrentCount();
     std::vector<float> calculateComulativeCount();
-
     void insertCurrentCount();
+    void orderElements();
 
     // validaciones
     bool inRange(int);
+    static bool compareByCurrentCount(const element &a, const element &b);
 
 public:
     // Constructor
     Generation(std::vector<int>, int (*)(int));
 
     // getters
-    std::vector<int> getValues() const { return values; }
+    std::vector<element> getElements() const { return this->elements; }
 
     // setters
-    void setValues(std::vector<int> values) { this->values = values; }
 
     // impresiones
-    void print();
+    void printElements();
 };
 
 #endif // GENERATION_H

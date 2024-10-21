@@ -22,6 +22,7 @@ public:
     Randomizer(std::vector<float> classes);
 
     int random();
+    int graphicRandom();
 };
 
 #endif // RANDOMIZER_H
