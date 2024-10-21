@@ -36,10 +36,15 @@ void Grapher::drawRectangle(float width, float height, float x, float y, Color c
     this->rectangles.push_back(rectangle);
 }
 
-void Grapher::drawDivisor(float angle)
+void Grapher::drawDivisor(float angle, float value)
 {
     float x = cos(angle);
     float y = sin(angle);
+
+    float label_x = cos(angle - 0.2);
+    float label_y = sin(angle - 0.2);
+
+    drawText(std::to_string(value), 12, (label_x * 75) + x_center, y_center - (label_y * 75), {0, 0, 0});
 
     VertexArray line(Lines, 2);
 
@@ -103,10 +108,6 @@ int Grapher::draw(float factor)
         window.clear(background);
 
         // Dibujar elementos estaticos
-        if (!texts.empty())
-            for (const Text &text : texts)
-                window.draw(text);
-
         if (!circles.empty())
             for (const CircleShape &circle : circles)
                 window.draw(circle);
@@ -118,7 +119,10 @@ int Grapher::draw(float factor)
         if (!rectangles.empty())
             for (const RectangleShape &rectangle : rectangles)
                 window.draw(rectangle);
-            
+
+        if (!texts.empty())
+            for (const Text &text : texts)
+                window.draw(text);
 
         window.display();
     }
@@ -132,41 +136,57 @@ void Grapher::moveLines(float speed)
     {
         // Calculamos el ángulo actual de la línea y lo convertimos a grados
         float dx = lines[i][1].position.x - x_center;
-        float dy = y_center - lines[i][1].position.y; // Invertimos para que Y crezca hacia arriba
+        float dy = y_center - lines[i][1].position.y;
 
-        float angle = atan2(dy, dx) * (180 / M_PI); // Convertimos el ángulo a grados
+        float label_dx = texts[i].getPosition().x - x_center;
+        float label_dy = y_center - texts[i].getPosition().y;
+
+        // Convertimos el ángulo a grados
+        float angle = atan2(dy, dx) * (180 / M_PI);
+        float label_angle = atan2(label_dy, label_dx) * (180 / M_PI);
 
         // Aseguramos que el ángulo esté entre 0 y 360 grados
         if (angle < 0)
             angle += 360;
+        if (label_angle < 0)
+            label_angle += 360;
 
         // Ajustamos el ángulo sumando velocidad
         angle += speed * 0.0001;
+        label_angle += speed * 0.0001;
 
         // Normalizamos el ángulo para que esté dentro del rango [0, 360)
         angle = fmod(angle, 360.0f);
+        label_angle = fmod(label_angle, 360.0f);
 
         // Calculamos las nuevas posiciones en X e Y en radianes
-        float radAngle = angle * (M_PI / 180); // Convertimos a radianes
+        float radAngle = angle * (M_PI / 180);
+        float label_radAngle = label_angle * (M_PI / 180);
 
-        float x = cos(radAngle); // Calculamos el coseno en radianes
-        float y = sin(radAngle); // Calculamos el seno en radianes
+        float x = cos(radAngle); 
+        float y = sin(radAngle);
+
+        float label_x = cos(label_radAngle);
+        float label_y = sin(label_radAngle);
 
         // Reescalamos y ajustamos las posiciones de acuerdo al centro
         x = (x * 100) + x_center; // Posición X
         y = y_center - (y * 100); // Posición Y
 
+        label_x = (label_x * 75) + x_center;
+        label_y = y_center - (label_y * 75);
+
         // Asignamos las nuevas posiciones a la línea
         lines[i][1].position.x = x;
         lines[i][1].position.y = y;
 
-        // break;  // Solo mover una línea
+        texts[i].setPosition(label_x, label_y);
     }
 }
 
 int Grapher::getAngle()
 {
-    int closestIndex = -1; // Almacena el índice de la línea más cercana a 0°
+    int closestIndex = -1;       // Almacena el índice de la línea más cercana a 0°
     float closestAngle = 360.0f; // El ángulo más cercano a 0° que hemos encontrado
 
     for (int i = 0; i < lines.size(); i++)
@@ -176,13 +196,11 @@ int Grapher::getAngle()
         float dy = y_center - lines[i][1].position.y; // Invertimos Y para que crezca hacia arriba
 
         // Calculamos el ángulo en grados
-        float angle = atan2(dy, dx) * (180 / M_PI); 
+        float angle = atan2(dy, dx) * (180 / M_PI);
 
         // Ajustamos el ángulo para que esté en el rango [0, 360)
         if (angle < 0)
             angle += 360;
-
-        std::cout << "Angle for line " << i << ": " << angle << std::endl;
 
         // Comprobamos si este ángulo es el más cercano a 0°
         if (abs(angle) < closestAngle)
@@ -191,9 +209,6 @@ int Grapher::getAngle()
             closestIndex = i;          // Guardamos el índice de la línea más cercana
         }
     }
-
-    // Imprimimos el resultado
-    std::cout << "Line closest to 0° has index: " << closestIndex << " with angle: " << closestAngle << std::endl;
 
     return closestIndex;
 }

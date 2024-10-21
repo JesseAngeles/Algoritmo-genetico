@@ -44,15 +44,17 @@ void Generation::calculateCurrentCount()
 {
     this->randomizer = Randomizer(calculateComulativeCount());
 
-    std::vector<std::thread> threads;
-    for (int i = 0; i < COUNT; i++)
-        threads.push_back(std::thread(&Generation::insertCurrentCount, this));
+    // Usa una lambda para invocar el método en un hilo
+    std::thread graphicThread([this]() { insertCurrentCount(true); });
 
-    for (auto &t : threads)
+    int count = 0;
+    while (count < TESTS && graphicThread.joinable())
     {
-        if (t.joinable())
-            t.join();
+        insertCurrentCount(false);
+        count++;
     }
+
+    graphicThread.join();
 }
 
 std::vector<float> Generation::calculateComulativeCount()
@@ -65,10 +67,15 @@ std::vector<float> Generation::calculateComulativeCount()
     return cumulative;
 }
 
-void Generation::insertCurrentCount()
+void Generation::insertCurrentCount(bool graphic)
 {
-    int index = this->randomizer.random();        // Asegúrate de que random() esté bien definido
-    std::lock_guard<std::mutex> lock(countMutex); // Bloqueo automático
+    int index;
+    if(graphic)
+        index = this->randomizer.graphicRandom();        // Asegúrate de que random() esté bien definido
+    else
+        index = this->randomizer.random();
+    
+    std::lock_guard<std::mutex> lock(countMutex);        // Bloqueo automático
     (elements[index].currentCount)++;
 }
 

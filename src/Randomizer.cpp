@@ -20,11 +20,15 @@ int Randomizer::random()
 
 int Randomizer::graphicRandom()
 {
-    
+
     Grapher grapher;
 
-    for (const auto &cls : classes)
-        grapher.drawDivisor(cls * 2 * M_PI);
+    float count = 0;
 
+    for (const auto &cls : classes)
+    {
+        grapher.drawDivisor(cls * 2 * M_PI, cls - count);
+        count = cls;
+    }
     return grapher.draw(rand() % 5 + 1);
 }

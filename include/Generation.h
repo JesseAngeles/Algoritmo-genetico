@@ -12,7 +12,7 @@
 #define MIN 0
 #define MAX 31
 
-#define COUNT 10000
+#define TESTS 1000
 
 struct element
 {
@@ -39,7 +39,7 @@ private:
     void calculateExpectedCount();
     void calculateCurrentCount();
     std::vector<float> calculateComulativeCount();
-    void insertCurrentCount();
+    void insertCurrentCount(bool graphic = true);
     void orderElements();
 
     // validaciones

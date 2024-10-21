@@ -40,7 +40,7 @@ public:
 
     void drawText(std::string content, int fontSize, float x, float y, Color color);
     void drawRectangle(float width, float height, float x, float y, Color color);
-    void drawDivisor(float angle);
+    void drawDivisor(float angle, float value);
     void drawCircle(float x, float y, float radius, Color color);
     void moveLines(float angle);
     int draw(float factor);
