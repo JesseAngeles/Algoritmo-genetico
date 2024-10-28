@@ -187,7 +187,7 @@ void Grapher::moveLines(float speed)
 int Grapher::getAngle()
 {
     int closestIndex = -1;       // Almacena el índice de la línea más cercana a 0°
-    float closestAngle = 360.0f; // El ángulo más cercano a 0° que hemos encontrado
+    float closestAngle = 180.0f; // El ángulo más cercano a 0° que hemos encontrado
 
     for (int i = 0; i < lines.size(); i++)
     {

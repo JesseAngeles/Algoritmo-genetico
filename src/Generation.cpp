@@ -6,8 +6,10 @@ Generation::Generation(std::vector<int> initValues, int (*function)(int),
     : function(function), cross(cross), mutation(mutation)
 {
     for (int &value : initValues)
-        if (inRange(value))
-            elements.push_back({value, 0, 0});
+        elements.push_back({value % (MAX + 1), 0, 0});
+
+        // if (MIN <= value && value <= MAX)
+        //     elements.push_back({value, 0, 0});
 
     this->size = this->elements.size();
 
@@ -15,7 +17,7 @@ Generation::Generation(std::vector<int> initValues, int (*function)(int),
     calculateExpectedCount();
     calculateCurrentCount();
 
-    orderElements();
+    std::sort(elements.begin(), elements.end(), compareByCurrentCount);
 }
 
 void Generation::calculateAverage()

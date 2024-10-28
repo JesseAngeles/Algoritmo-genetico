@@ -4,23 +4,25 @@ Randomizer::Randomizer(std::vector<float> classes) : classes(classes)
 {
     this->maxClass = this->classes.size();
 
-    std::srand(std::time(nullptr));
+    // std::srand(std::time(nullptr));
 };
 
 int Randomizer::random()
 {
-    float random_num = FLOAT_MIN + (float)(rand()) / ((float)(RAND_MAX / (FLOAT_MAX - FLOAT_MIN)));
+    std::random_device rd;                  // Generador basado en hardware
+    std::mt19937 gen(rd());                  
+    std::uniform_real_distribution<float> distr(FLOAT_MIN, FLOAT_MAX); // Distribución uniforme
 
+    float random_num = distr(gen);          // Generar un número aleatorio en el rango [FLOAT_MIN, FLOAT_MAX]
     for (int i = 0; i < classes.size(); i++)
         if (random_num <= classes[i])
-            return i;
+            return i;                        
 
-    return 1;
+    return 1;                           
 }
 
 int Randomizer::graphicRandom()
 {
-
     Grapher grapher;
 
     float count = 0;
@@ -30,5 +32,10 @@ int Randomizer::graphicRandom()
         grapher.drawDivisor(cls * 2 * M_PI, cls - count);
         count = cls;
     }
-    return grapher.draw(rand() % 5 + 1);
+
+    std::random_device rd;                        
+    std::mt19937 gen(rd());                   
+    std::uniform_int_distribution<int> distr(1, 5);  
+
+    return grapher.draw(distr(gen));
 }

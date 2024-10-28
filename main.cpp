@@ -35,7 +35,6 @@ int main(int argc, char *argv[])
 
     do
     {
-        print(initValues);
         Generation generation(initValues, function.func, cross.func, mutation.func);
         vector<int> values = getValues(generation.getElements());
 
@@ -56,7 +55,9 @@ int main(int argc, char *argv[])
         {
             errorCount--;
             cout << "Error count: " << errorCount << endl;
+            initValues = generation.cross(values);
         }
+        print(initValues);
     } while (errorCount);
     return 0;
 }
@@ -85,8 +86,7 @@ vector<int> getInitValues(int argc, char *argv[])
     }
     else
     {
-        for (int i = 0; i < DEFAULT_SIZE; i++)
-            initValues.push_back(rand() % 32);
+        initValues = {13, 24, 8, 19};
     }
 
     return initValues;
@@ -95,18 +95,11 @@ vector<int> getInitValues(int argc, char *argv[])
 tuple<functionEntry, functionGenetic, functionGenetic> getInitFunctions(int argc, char *argv[])
 {
 
-    vector<functionEntry> functions = {
-        {"functionSquare", functionSquare},
-        {"functionCube", functionCube},
-        {"functionDoble", functionDoble}};
+    vector<functionEntry> functions = {{"functionSquare", functionSquare}};
 
-    vector<functionGenetic> crosses = {
-        {"binarySwitch", geneticCrossBinarySwitch},
-        {"binaryAddition", geneticCrossBinaryAddition}};
+    vector<functionGenetic> crosses = {{"binarySwitch", geneticCrossBinarySwitch}};
 
-    vector<functionGenetic> mutations = {
-        {"randomSwitch", geneticMutationRandomSwitch},
-        {"zeroSwitch", geneticMutationZeroSwitch}};
+    vector<functionGenetic> mutations = {{"randomSwitch", geneticMutationRandomSwitch}};
 
     functionEntry entry_function = functions[0];
     functionGenetic cross = crosses[0];

@@ -17,8 +17,3 @@ std::vector<int> geneticMutationRandomSwitch(std::vector<int> values)
 
     return values;
 }
-
-std::vector<int> geneticMutationZeroSwitch(std::vector<int> values)
-{
-    return values;
-}

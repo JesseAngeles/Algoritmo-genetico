@@ -34,9 +34,3 @@ std::vector<int> geneticCrossBinarySwitch(std::vector<int> values)
 
     return newValues;
 }
-
-std::vector<int> geneticCrossBinaryAddition(std::vector<int> values)
-{
-    return values;
-}
-
