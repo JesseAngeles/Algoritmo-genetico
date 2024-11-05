@@ -3,6 +3,7 @@
 #include <set>
 
 #include "Generation.h"
+#include "Randomizer.h"
 
 #include "./src/Functions.cpp"
 #include "./src/GeneticCrosses.cpp"
@@ -13,6 +14,9 @@
 using namespace std;
 
 // Funciones principales
+
+tuple<vector<int>, int, int, int, functionEntry, functionGenetic, functionGenetic> getParams(int, char *[]);
+
 vector<int> getInitValues(int, char *[]);
 tuple<functionEntry, functionGenetic, functionGenetic> getInitFunctions(int argc, char *argv[]);
 vector<int> getValues(vector<element>);
@@ -21,21 +25,27 @@ vector<int> getValues(vector<element>);
 bool areEqual(vector<int>);
 void print(vector<int>);
 
+//! ./build/main.exe size min max rand? function cross mutation
 int main(int argc, char *argv[])
 {
+    // Read params
+    tuple<vector<int>, int, int, int, functionEntry, functionGenetic, functionGenetic> data = getParams(argc, argv);
+    vector<int> initValues = get<0>(data);
+    int size = get<1>(data);
+    int min = get<2>(data);
+    int max = get<3>(data);
+    functionEntry function = get<4>(data);
+    functionGenetic cross = get<5>(data);
+    functionGenetic mutation = get<6>(data);
+
     set<vector<int>> historial;
-
-    vector<int> initValues = getInitValues(argc, argv);
-    tuple<functionEntry, functionGenetic, functionGenetic> functions = getInitFunctions(argc, argv);
-    functionEntry function = get<0>(functions);
-    functionGenetic cross = get<1>(functions);
-    functionGenetic mutation = get<2>(functions);
-
     int errorCount = 3;
 
+    print(initValues);
+    
     do
     {
-        Generation generation(initValues, function.func, cross.func, mutation.func);
+        Generation generation(initValues, min, max, function.func, cross.func, mutation.func);
         vector<int> values = getValues(generation.getElements());
 
         if (historial.find(values) == historial.end())
@@ -45,7 +55,7 @@ int main(int argc, char *argv[])
         }
         else if (areEqual(values)) // Son iguales todos
         {
-            if (values[0] == MAX) // Son todos los mejores
+            if (values[0] == max) // Son todos los mejores
                 break;
 
             initValues = generation.mutation(values);
@@ -62,16 +72,44 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-vector<int> getInitValues(int argc, char *argv[])
+tuple<vector<int>, int, int, int, functionEntry, functionGenetic, functionGenetic> getParams(int argc, char *argv[])
 {
-    vector<int> initValues;
+    vector<functionEntry> functions = {{"functionSquare", functionSquare}};
+    vector<functionGenetic> crosses = {{"binarySwitch", geneticCrossBinarySwitch}};
+    vector<functionGenetic> mutations = {{"randomSwitch", geneticMutationRandomSwitch}};
 
-    if (argc > 1)
-    { // Los elementos iniciales se obtienen desde la ejecución
-        for (int i = 1; i < argc; i++)
-        { // Excluir el último argumento (nombre de la función)
+    vector<int> values;
+    int size, min, max;
+    functionEntry function;
+    functionGenetic cross;
+    functionGenetic mutation;
+
+    try
+    {
+        size = stoi(argv[1]);
+        min = stoi(argv[2]);
+        max = stoi(argv[3]);
+    }
+    catch (const invalid_argument &e)
+    {
+        cerr << "Error: Argumentos iniciales deben ser números enteros válidos." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    int index = 5;
+
+    if (stoi(argv[4])) // random
+    {
+        for (int i = 0; i < size; i++)
+            values.push_back(random(min, max));
+    }
+    else // Leer el tamaño de datos
+    {
+        index += size;
+
+        for (int i = 5; i < index; i++)
+        {
             string argument = argv[i];
-
             bool isNumber = true;
             for (char &c : argument)
                 if (!isdigit(c))
@@ -81,70 +119,23 @@ vector<int> getInitValues(int argc, char *argv[])
                 }
 
             if (isNumber)
-                initValues.push_back(stoi(argument));
-        }
-    }
-    else
-    {
-        initValues = {13, 24, 8, 19};
-    }
-
-    return initValues;
-}
-
-tuple<functionEntry, functionGenetic, functionGenetic> getInitFunctions(int argc, char *argv[])
-{
-
-    vector<functionEntry> functions = {{"functionSquare", functionSquare}};
-
-    vector<functionGenetic> crosses = {{"binarySwitch", geneticCrossBinarySwitch}};
-
-    vector<functionGenetic> mutations = {{"randomSwitch", geneticMutationRandomSwitch}};
-
-    functionEntry entry_function = functions[0];
-    functionGenetic cross = crosses[0];
-    functionGenetic mutation = mutations[0];
-
-    if (argc > 1)
-    {
-        vector<string> param_functions;
-        for (int i = 1; i < argc; i++)
-        {
-            string argument = argv[i];
-
-            bool isNumber = true;
-            for (char &c : argument)
-                if (!isdigit(c))
-                {
-                    isNumber = false;
-                    break;
-                }
-
-            if (!isNumber)
-                param_functions.push_back(string(argument));
-        }
-
-        if (param_functions.size() >= 1) // Busca la función correspondiente en `functions`
-        {
-            for (const functionEntry &fun : functions)
-                if (fun.name == param_functions[0])
-                    entry_function = fun;
-
-            if (param_functions.size() >= 2) // Busca la función correspondiente en `crosses`
-            {
-                for (const functionGenetic &fun : crosses)
-                    if (fun.name == param_functions[1])
-                        cross = fun;
-
-                if (param_functions.size() >= 3) // Busca la función correspondiente en `mutations`
-                    for (const functionGenetic &fun : mutations)
-                        if (fun.name == param_functions[2])
-                            mutation = fun;
-            }
+                values.push_back(stoi(argument));
         }
     }
 
-    return make_tuple(entry_function, cross, mutation);
+    for (const functionEntry &fun : functions)
+        if (fun.name == argv[index++])
+            function = fun;
+
+    for (const functionGenetic &fun : crosses)
+        if (fun.name == argv[index++])
+            cross = fun;
+
+    for (const functionGenetic &fun : mutations)
+        if (fun.name == argv[index++])
+            mutation = fun;
+
+    return make_tuple(values, size, min, max, function, cross, mutation);
 }
 
 vector<int> getValues(vector<element> elements)

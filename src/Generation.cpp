@@ -1,20 +1,20 @@
 #include "Generation.h"
 
 // Constructor
-Generation::Generation(std::vector<int> initValues, int (*function)(int),
-                       std::vector<int> (*cross)(std::vector<int>), std::vector<int> (*mutation)(std::vector<int>))
-    : function(function), cross(cross), mutation(mutation)
+Generation::Generation(std::vector<int> initValues, int min, int max,
+                       int (*function)(int),
+                       std::vector<int> (*cross)(std::vector<int>),
+                       std::vector<int> (*mutation)(std::vector<int>))
+    : min(min), max(max), function(function), cross(cross), mutation(mutation)
 {
     for (int &value : initValues)
-        elements.push_back({value % (MAX + 1), 0, 0});
-
-        // if (MIN <= value && value <= MAX)
-        //     elements.push_back({value, 0, 0});
+        elements.push_back({value % (max + 1), 0, 0});
 
     this->size = this->elements.size();
 
     calculateAverage();
     calculateExpectedCount();
+    calculateCumulativeCount();
     calculateCurrentCount();
 
     std::sort(elements.begin(), elements.end(), compareByCurrentCount);
@@ -44,10 +44,15 @@ void Generation::calculateExpectedCount()
     elements[0].expectedCount += (1 - count);
 }
 
+void Generation::calculateCumulativeCount()
+{
+    elements[0].cumulativeExpectedCount = elements[0].expectedCount;
+    for (int i = 1; i < this->size; i++)
+        elements[i].cumulativeExpectedCount = elements[i].expectedCount + elements[i - 1].cumulativeExpectedCount;
+}
+
 void Generation::calculateCurrentCount()
 {
-    this->randomizer = Randomizer(calculateComulativeCount());
-
     // Usa una lambda para invocar el método en un hilo
     std::thread graphicThread([this]()
                               { insertCurrentCount(true); });
@@ -62,24 +67,33 @@ void Generation::calculateCurrentCount()
     graphicThread.join();
 }
 
-std::vector<float> Generation::calculateComulativeCount()
-{
-    std::vector<float> cumulative;
-    cumulative.push_back(elements[0].expectedCount);
-    for (int i = 1; i < this->size; i++)
-        cumulative.push_back(elements[i].expectedCount + cumulative[i - 1]);
-
-    return cumulative;
-}
-
 void Generation::insertCurrentCount(bool graphic)
 {
     int index;
     if (graphic)
-        index = this->randomizer.graphicRandom(); // Asegúrate de que random() esté bien definido
-    else
-        index = this->randomizer.random();
+    {
+        Grapher grapher;
+        float random_num = random(1, 5);
 
+        float count = 0;
+        for (const auto &cls : elements)
+        {
+            grapher.drawDivisor(cls.cumulativeExpectedCount * 2 * M_PI, cls.cumulativeExpectedCount - count);
+            count = cls.cumulativeExpectedCount;
+        }
+
+        index = grapher.draw(random_num);
+    }
+    else
+    {
+        float random_num = random(0, 1);
+        for (int i = 0; i < elements.size(); i++)
+            if (random_num <= elements[i].cumulativeExpectedCount)
+            {
+                index = i;
+                break;
+            }
+    }
     std::lock_guard<std::mutex> lock(countMutex); // Bloqueo automático
     (elements[index].currentCount)++;
 }
@@ -96,7 +110,7 @@ bool compareByCurrentCount(const element &a, const element &b)
 // Validación
 bool Generation::inRange(int value)
 {
-    if (MIN <= value && value <= MAX)
+    if (min <= value && value <= max)
         return true;
     return false;
 }

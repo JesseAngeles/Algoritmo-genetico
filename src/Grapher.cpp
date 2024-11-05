@@ -1,7 +1,7 @@
 #include "Grapher.h"
 
 Grapher::Grapher(int width, int height, std::string name, Color background)
-    : width(width), height(height), name(name), window(VideoMode(width, height), name), background(background)
+    : width(width), height(height), name(name), window(VideoMode(width, height), name, Style::Close), background(background)
 {
     if (!this->font.loadFromFile("resources/Roboto-Medium.ttf"))
         exit(1);
