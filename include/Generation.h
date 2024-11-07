@@ -6,11 +6,12 @@
 #include <mutex>
 #include <vector>
 #include <algorithm>
+#include <atomic>
 
 #include "Randomizer.h"
 #include "Grapher.h"
 
-#define TESTS 100000
+#define TESTS 50000
 
 struct element
 {
@@ -29,6 +30,7 @@ private:
 
     std::vector<element> elements;
     std::mutex countMutex;
+    std::atomic<bool> graphicClosed{false};
 
     int functionTotal;
     float functionAverage;

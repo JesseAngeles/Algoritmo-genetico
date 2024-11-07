@@ -65,30 +65,23 @@ void Generation::calculateCurrentCount()
                              { insertCurrentCount(false); });
         count++;
 
-        if (!graphicThread.joinable()) // Si el hilo gráfico terminó, se detiene
-        {
-            std::cout << "Graphic thread ended. Stopping additional threads.\n";
+        // Verificar la bandera para detener la creación de hilos
+        if (graphicClosed)
             break;
-        }
     }
 
     if (graphicThread.joinable())
-    {
         graphicThread.join();
-    }
-
-    std::cout << "Total count: " << count << std::endl;
 
     for (std::thread &thread : threads)
-    {
         if (thread.joinable())
             thread.join();
-    }
 }
 
 void Generation::insertCurrentCount(bool graphic)
 {
     int index = -1;
+
     if (graphic)
     {
         Grapher grapher;
@@ -102,9 +95,12 @@ void Generation::insertCurrentCount(bool graphic)
         }
 
         index = grapher.draw(random_num);
-        std::cout << "index: " << index << std::endl;
-        if (index == -1)
+
+        if (index == -1) // Si la ventana se cerró
+        {
+            graphicClosed = true;
             return;
+        }
     }
     else
     {
@@ -116,9 +112,12 @@ void Generation::insertCurrentCount(bool graphic)
                 break;
             }
     }
-    
-    std::lock_guard<std::mutex> lock(countMutex); // Bloqueo automático
-    (elements[index].currentCount)++;
+
+    if (index >= 0)
+    {
+        std::lock_guard<std::mutex> lock(countMutex);
+        elements[index].currentCount++;
+    }
 }
 
 void Generation::orderElements()
