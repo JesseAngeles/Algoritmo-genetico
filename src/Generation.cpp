@@ -53,23 +53,42 @@ void Generation::calculateCumulativeCount()
 
 void Generation::calculateCurrentCount()
 {
-    // Usa una lambda para invocar el método en un hilo
     std::thread graphicThread([this]()
                               { insertCurrentCount(true); });
 
+    std::vector<std::thread> threads;
     int count = 0;
-    while (count < TESTS && graphicThread.joinable())
+
+    while (count < TESTS)
     {
-        insertCurrentCount(false);
+        threads.emplace_back([this]()
+                             { insertCurrentCount(false); });
         count++;
+
+        if (!graphicThread.joinable()) // Si el hilo gráfico terminó, se detiene
+        {
+            std::cout << "Graphic thread ended. Stopping additional threads.\n";
+            break;
+        }
     }
 
-    graphicThread.join();
+    if (graphicThread.joinable())
+    {
+        graphicThread.join();
+    }
+
+    std::cout << "Total count: " << count << std::endl;
+
+    for (std::thread &thread : threads)
+    {
+        if (thread.joinable())
+            thread.join();
+    }
 }
 
 void Generation::insertCurrentCount(bool graphic)
 {
-    int index;
+    int index = -1;
     if (graphic)
     {
         Grapher grapher;
@@ -83,6 +102,9 @@ void Generation::insertCurrentCount(bool graphic)
         }
 
         index = grapher.draw(random_num);
+        std::cout << "index: " << index << std::endl;
+        if (index == -1)
+            return;
     }
     else
     {
@@ -94,6 +116,7 @@ void Generation::insertCurrentCount(bool graphic)
                 break;
             }
     }
+    
     std::lock_guard<std::mutex> lock(countMutex); // Bloqueo automático
     (elements[index].currentCount)++;
 }

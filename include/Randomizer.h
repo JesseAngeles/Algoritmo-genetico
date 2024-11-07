@@ -3,7 +3,6 @@
 
 #include <random>
 
-
 float random(float min, float max);
 
 #endif // RANDOMIZER_H

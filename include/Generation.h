@@ -10,7 +10,7 @@
 #include "Randomizer.h"
 #include "Grapher.h"
 
-#define TESTS 1000
+#define TESTS 100000
 
 struct element
 {

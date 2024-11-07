@@ -25,7 +25,7 @@ vector<int> getValues(vector<element>);
 bool areEqual(vector<int>);
 void print(vector<int>);
 
-//! ./build/main.exe size min max rand? function cross mutation
+//! ./build/main.exe size min max is_rand function cross mutation
 int main(int argc, char *argv[])
 {
     // Read params

@@ -83,7 +83,10 @@ int Grapher::draw(float factor)
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
+            {
                 window.close();
+                return -1;
+            }
         }
 
         sf::Time elapsed = clock.getElapsedTime();
@@ -163,7 +166,7 @@ void Grapher::moveLines(float speed)
         float radAngle = angle * (M_PI / 180);
         float label_radAngle = label_angle * (M_PI / 180);
 
-        float x = cos(radAngle); 
+        float x = cos(radAngle);
         float y = sin(radAngle);
 
         float label_x = cos(label_radAngle);
