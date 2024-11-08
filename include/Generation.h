@@ -28,6 +28,8 @@ private:
     int min;
     int max;
 
+    int count;
+
     std::vector<element> elements;
     std::mutex countMutex;
     std::atomic<bool> graphicClosed{false};
@@ -52,7 +54,8 @@ public:
     Generation(std::vector<int> elements, int min, int max,
                int (*function)(int),
                std::vector<int> (*cross)(std::vector<int>, int, int),
-               std::vector<int> (*mutation)(std::vector<int>, int, int));
+               std::vector<int> (*mutation)(std::vector<int>, int, int),
+               int count);
 
     // Getters
     std::vector<element> getElements() const { return elements; }

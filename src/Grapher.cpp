@@ -1,7 +1,9 @@
 #include "Grapher.h"
 
 Grapher::Grapher(int width, int height, std::string name, Color background)
-    : width(width), height(height), name(name), window(VideoMode(width, height), name, Style::Close), background(background)
+    : width(width), height(height), name(name),
+      window(VideoMode(width, height), name, Style::Close), 
+      background(background)
 {
     if (!this->font.loadFromFile("resources/Roboto-Medium.ttf"))
         exit(1);
@@ -68,28 +70,28 @@ void ::Grapher::drawCircle(float x, float y, float radius, Color color)
     this->circles.push_back(circle);
 }
 
-int Grapher::draw(float factor)
+int Grapher::draw(float factor, int count)
 {
-
     float speed = factor * 500;
     float seconds = 0.05f; // Tiempo inicial para el primer mensaje
     float time = 5.0f;     // Tiempo límite para cerrar la ventana
 
-    sf::Clock clock;
+    Clock clock;
+    Texture texture;
 
     while (window.isOpen())
     {
-        sf::Event event;
+        Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
+            if (event.type == Event::Closed)
             {
                 window.close();
                 return -1;
             }
         }
 
-        sf::Time elapsed = clock.getElapsedTime();
+        Time elapsed = clock.getElapsedTime();
         float deltaTime = elapsed.asSeconds();
 
         moveLines(speed);
@@ -105,6 +107,10 @@ int Grapher::draw(float factor)
         // Cerrar la ventana si han pasado más de `time` segundos
         if (deltaTime > 3.0f)
         {
+            texture.create(window.getSize().x, window.getSize().y);
+            texture.update(window);
+            texture.copyToImage().saveToFile("images/" + std::to_string(count) + ".png");
+
             window.close();
         }
 
@@ -135,6 +141,9 @@ int Grapher::draw(float factor)
 
 void Grapher::moveLines(float speed)
 {
+    if (speed <= 0)
+        return;
+
     for (int i = 0; i < lines.size(); i++)
     {
         // Calculamos el ángulo actual de la línea y lo convertimos a grados

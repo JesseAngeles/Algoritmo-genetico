@@ -4,8 +4,9 @@
 Generation::Generation(std::vector<int> initValues, int min, int max,
                        int (*function)(int),
                        std::vector<int> (*cross)(std::vector<int>, int, int),
-                       std::vector<int> (*mutation)(std::vector<int>, int, int))
-    : min(min), max(max), function(function), cross(cross), mutation(mutation)
+                       std::vector<int> (*mutation)(std::vector<int>, int, int),
+                       int count)
+    : min(min), max(max), function(function), cross(cross), mutation(mutation), count(count)
 {
     for (int &value : initValues)
         elements.push_back({value % (max + 1), 0, 0});
@@ -88,13 +89,16 @@ void Generation::insertCurrentCount(bool graphic)
         float random_num = random(1, 5);
 
         float count = 0;
+        
+        printElements();
+
         for (const auto &cls : elements)
         {
             grapher.drawDivisor(cls.cumulativeExpectedCount * 2 * M_PI, cls.cumulativeExpectedCount - count);
             count = cls.cumulativeExpectedCount;
         }
 
-        index = grapher.draw(random_num);
+        index = grapher.draw(random_num, this->count);
 
         if (index == -1) // Si la ventana se cerró
         {
@@ -149,6 +153,7 @@ void Generation::printElements()
         std::cout << "f(" << element.value
                   << ") = " << this->function(element.value)
                   << ", " << element.expectedCount
+                  << ", " << element.cumulativeExpectedCount
                   << ", " << element.currentCount << std::endl;
     }
 }

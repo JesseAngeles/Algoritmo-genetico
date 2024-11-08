@@ -7,9 +7,10 @@
 
 #define BIT_SIZE 16
 
-std::vector<int> crossBinarySwitch(std::vector<int> values, int min, int max)
+// El mejor gen crea parejas con mejores genes
+std::vector<int> crossBestSwitchPair(std::vector<int> values, int min, int max)
 {
-    int max_bit = std::ceil(std::log2(max));
+    int max_bit = std::ceil(std::log2(max++));
 
     std::bitset<BIT_SIZE> min_2(min);
     std::bitset<BIT_SIZE> max_2(max);
@@ -17,19 +18,11 @@ std::vector<int> crossBinarySwitch(std::vector<int> values, int min, int max)
 
     std::vector<int> new_values;
 
-    // std::cout << "max_bit: " << max_bit << std::endl;
-    // std::cout << "min: " << min << ": " << min_2 << std::endl;
-    // std::cout << "max: " << max << ": " << max_2 << std::endl;
-    // std::cout << "best: " << values[0] << ": " << best_value << std::endl;
-
     for (int i = 1; i < values.size(); i++)
     {
         std::bitset<BIT_SIZE> best = best_value;
         std::bitset<BIT_SIZE> value(values[i]);
         const int num_bits = random(0, max_bit);
-
-        // std::cout << "num_bits: " << num_bits << std::endl;
-        // std::cout << "value: " << values[i] << ": " << value << std::endl;
 
         for (int j = 0; j < num_bits; j++)
         {
@@ -38,11 +31,11 @@ std::vector<int> crossBinarySwitch(std::vector<int> values, int min, int max)
             best[j] = tmp;
         }
 
-        new_values.push_back(int(best.to_ullong()));
+        new_values.push_back(int(best.to_ullong()) % max);
         if (new_values.size() == values.size())
             break;
 
-        new_values.push_back(int(value.to_ullong()));
+        new_values.push_back(int(value.to_ullong()) % max);
         if (new_values.size() == values.size())
             break;
     }
@@ -50,34 +43,32 @@ std::vector<int> crossBinarySwitch(std::vector<int> values, int min, int max)
     return new_values;
 }
 
-std::vector<int> geneticCrossBinarySwitch(std::vector<int> values, int min, int max)
+// El mejor gen hereda los genes de mayor valor a un solo hijo con los segundos mejores
+std::vector<int> crossBestSwitch(std::vector<int> values, int min, int max)
 {
-    std::bitset<5> bestValue(values[0]);
+    int max_bit = std::ceil(std::log2(++max));
 
-    std::vector<int> newValues;
+    std::bitset<BIT_SIZE> min_2(min);
+    std::bitset<BIT_SIZE> max_2(max);
+    std::bitset<BIT_SIZE> best_value(values[0]);
+
+    std::vector<int> new_values;
+    new_values.push_back(values[0]);
 
     for (int i = 1; i < values.size(); i++)
     {
-        const int numBits = (2 * i) - 1;
-        std::bitset<5> binary(values[i]);
+        std::bitset<BIT_SIZE> value(values[i]);
+        const int num_bits = random(0, max_bit);
 
-        std::bitset<5> best = bestValue;
-        // swap de valores binarios
-        for (int j = 0; j < numBits; j++)
+        for (int j = num_bits; j > 0; j--)
         {
-            bool value = binary[j];
-            binary[j] = best[j];
-            best[j] = value;
+            value[j] = best_value[j];
         }
 
-        newValues.push_back(int(best.to_ulong()) % 32);
-        if (newValues.size() == values.size())
-            break;
-
-        newValues.push_back(int(binary.to_ulong()) % 32);
-        if (newValues.size() == values.size())
+        new_values.push_back(int(value.to_ullong()) % max);
+        if (new_values.size() == values.size())
             break;
     }
 
-    return newValues;
+    return new_values;
 }

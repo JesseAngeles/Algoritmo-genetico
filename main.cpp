@@ -39,44 +39,90 @@ int main(int argc, char *argv[])
     functionGenetic mutation = get<6>(data);
 
     set<vector<int>> historial;
-    int errorCount = 3;
+    set<vector<int>> bestGenerations;
+
+    vector<int> lastValues;
+
+    int errorCount = 10;
+    int currentMax = 0;
+    int count = 0;
 
     print(initValues);
 
     do
     {
-        Generation generation(initValues, min, max, function.func, cross.func, mutation.func);
+        count++;
+        lastValues = initValues;
+        Generation generation(initValues, min, max, function.func, cross.func, mutation.func, count);
         vector<int> values = getValues(generation.getElements());
+        currentMax = (values[0] > currentMax ? values[0] : currentMax);
 
         if (historial.find(values) == historial.end())
         {
+            if (areEqual(values)) // Son iguales todos
+            {
+                if (values[0] == max) // Son todos los mejores
+                {
+                    cout << "\nBest generation reached:\n";
+                    bestGenerations.insert(values);
+                    break;
+                }
+
+                initValues = generation.mutation(values, min, max);
+                cout << "Mutation: \n";
+            }
+
             historial.insert(values);
             initValues = generation.cross(values, min, max);
         }
-        else if (areEqual(values)) // Son iguales todos
-        {
-            if (values[0] == max) // Son todos los mejores
-                break;
-
-            initValues = generation.mutation(values, min, max);
-            cout << "Mutation: \n";
-        }
         else // Ya se encontro esa generación anteriormente
         {
-            errorCount--;
-            cout << "Error count: " << errorCount << endl;
-            initValues = generation.cross(values, min, max);
+            if (values[0] < currentMax)
+            {
+                cout << values[0] << " < " << currentMax << endl;
+                errorCount--;
+                bestGenerations.insert(lastValues);
+                currentMax = values[0];
+                // cout << "Worse" << endl;
+            }
+
+            if (errorCount)
+            {
+                cout << "Mutation: \n";
+                initValues = generation.mutation(values, min, max);
+            }
         }
         print(initValues);
     } while (errorCount);
+
+    cout << endl;
+    for (const vector<int> &generation : bestGenerations)
+        print(generation);
+
+    cout << "\nGeneration count: " << count << endl;
+
     return 0;
 }
 
 tuple<vector<int>, int, int, int, functionEntry, functionGenetic, functionGenetic> getParams(int argc, char *argv[])
 {
-    vector<functionEntry> functions = {{"functionSquare", functionSquare}};
-    vector<functionGenetic> crosses = {{"binarySwitch", crossBinarySwitch}};
-    vector<functionGenetic> mutations = {{"randomSwitch", geneticMutationRandomSwitch}};
+    for (int i = 0; i < argc; i++)
+        cout << argv[i] << endl;
+    cout << endl;
+
+    vector<functionEntry> functions = {
+        {"square", functionSquare},
+        {"cube", functionCube},
+        {"doble", functionDoble},
+        {"sin", functionSin},
+        {"log", functionLog}};
+
+    vector<functionGenetic> crosses = {
+        {"bestSwitchPair", crossBestSwitchPair},
+        {"bestSwitch", crossBestSwitch}};
+    vector<functionGenetic> mutations = {
+        {"randomBit", mutationRandomBit},
+        {"multipleRandom", mutationMultipleRandom}};
 
     vector<int> values;
     int size, min, max;
@@ -124,15 +170,17 @@ tuple<vector<int>, int, int, int, functionEntry, functionGenetic, functionGeneti
     }
 
     for (const functionEntry &fun : functions)
-        if (fun.name == argv[index++])
+        if (fun.name == argv[index])
             function = fun;
 
+    index++;
     for (const functionGenetic &fun : crosses)
-        if (fun.name == argv[index++])
+        if (fun.name == argv[index])
             cross = fun;
 
+    index++;
     for (const functionGenetic &fun : mutations)
-        if (fun.name == argv[index++])
+        if (fun.name == argv[index])
             mutation = fun;
 
     return make_tuple(values, size, min, max, function, cross, mutation);
