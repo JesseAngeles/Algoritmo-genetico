@@ -3,8 +3,8 @@
 // Constructor
 Generation::Generation(std::vector<int> initValues, int min, int max,
                        int (*function)(int),
-                       std::vector<int> (*cross)(std::vector<int>),
-                       std::vector<int> (*mutation)(std::vector<int>))
+                       std::vector<int> (*cross)(std::vector<int>, int, int),
+                       std::vector<int> (*mutation)(std::vector<int>, int, int))
     : min(min), max(max), function(function), cross(cross), mutation(mutation)
 {
     for (int &value : initValues)

@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     int errorCount = 3;
 
     print(initValues);
-    
+
     do
     {
         Generation generation(initValues, min, max, function.func, cross.func, mutation.func);
@@ -51,21 +51,21 @@ int main(int argc, char *argv[])
         if (historial.find(values) == historial.end())
         {
             historial.insert(values);
-            initValues = generation.cross(values);
+            initValues = generation.cross(values, min, max);
         }
         else if (areEqual(values)) // Son iguales todos
         {
             if (values[0] == max) // Son todos los mejores
                 break;
 
-            initValues = generation.mutation(values);
+            initValues = generation.mutation(values, min, max);
             cout << "Mutation: \n";
         }
         else // Ya se encontro esa generación anteriormente
         {
             errorCount--;
             cout << "Error count: " << errorCount << endl;
-            initValues = generation.cross(values);
+            initValues = generation.cross(values, min, max);
         }
         print(initValues);
     } while (errorCount);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 tuple<vector<int>, int, int, int, functionEntry, functionGenetic, functionGenetic> getParams(int argc, char *argv[])
 {
     vector<functionEntry> functions = {{"functionSquare", functionSquare}};
-    vector<functionGenetic> crosses = {{"binarySwitch", geneticCrossBinarySwitch}};
+    vector<functionGenetic> crosses = {{"binarySwitch", crossBinarySwitch}};
     vector<functionGenetic> mutations = {{"randomSwitch", geneticMutationRandomSwitch}};
 
     vector<int> values;

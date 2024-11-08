@@ -51,8 +51,8 @@ public:
     // Constructor
     Generation(std::vector<int> elements, int min, int max,
                int (*function)(int),
-               std::vector<int> (*cross)(std::vector<int>),
-               std::vector<int> (*mutation)(std::vector<int>));
+               std::vector<int> (*cross)(std::vector<int>, int, int),
+               std::vector<int> (*mutation)(std::vector<int>, int, int));
 
     // Getters
     std::vector<element> getElements() const { return elements; }
@@ -61,8 +61,8 @@ public:
 
     // Functions
     int (*function)(int);
-    std::vector<int> (*cross)(std::vector<int>);
-    std::vector<int> (*mutation)(std::vector<int>);
+    std::vector<int> (*cross)(std::vector<int>, int, int);
+    std::vector<int> (*mutation)(std::vector<int>, int, int);
 
     // impresiones
     void printElements();
