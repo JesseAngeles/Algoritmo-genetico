@@ -2,7 +2,7 @@
 
 // Constructor
 Generation::Generation(std::vector<int> initValues, int min, int max,
-                       int (*function)(int),
+                       long int (*function) (long int),
                        std::vector<int> (*cross)(std::vector<int>, int, int),
                        std::vector<int> (*mutation)(std::vector<int>, int, int),
                        int count)
@@ -35,7 +35,7 @@ void Generation::calculateExpectedCount()
     float count = 0;
     for (int i = 0; i < size; i++)
     {
-        int functionValue = function(elements[i].value);
+        long int functionValue = function(elements[i].value);
         float expected = functionValue / (functionAverage * size);
         elements[i].expectedCount = expected;
         count += expected;
@@ -89,8 +89,6 @@ void Generation::insertCurrentCount(bool graphic)
         float random_num = random(1, 5);
 
         float count = 0;
-        
-        printElements();
 
         for (const auto &cls : elements)
         {
@@ -152,8 +150,8 @@ void Generation::printElements()
     {
         std::cout << "f(" << element.value
                   << ") = " << this->function(element.value)
-                  << ", " << element.expectedCount
-                  << ", " << element.cumulativeExpectedCount
-                  << ", " << element.currentCount << std::endl;
+                  << "\t " << element.expectedCount
+                  << "\t " << element.cumulativeExpectedCount
+                  << "\t " << element.currentCount << std::endl;
     }
 }

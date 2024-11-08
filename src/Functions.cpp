@@ -5,15 +5,15 @@
 struct functionEntry
 {
     std::string name;
-    int (*func)(int);
+    long int (*func)(long int);
 };
 
-int functionSquare(int x) { return x * x; }
+long int functionSquare(long int x) { return x * x; }
 
-int functionCube(int x) { return x * x * x; }
+long int functionCube(long int x) { return x * x * x; }
 
-int functionDoble(int x) { return 2 * x; }
+long int functionDoble(long int x) { return 2 * x; }
 
-int functionSin(int x) { return 100 * sin(x); }
+long int functionSin(long int x) { return 100 * sin(x); }
 
-int functionLog(int x) { return 100 * log(x); }
+long int functionLog(long int x) { return 100 * log(x); }

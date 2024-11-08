@@ -34,8 +34,8 @@ private:
     std::mutex countMutex;
     std::atomic<bool> graphicClosed{false};
 
-    int functionTotal;
-    float functionAverage;
+    long int functionTotal;
+    double functionAverage;
 
     // Functions
     void calculateAverage();
@@ -52,7 +52,7 @@ private:
 public:
     // Constructor
     Generation(std::vector<int> elements, int min, int max,
-               int (*function)(int),
+               long int (*function) (long int),
                std::vector<int> (*cross)(std::vector<int>, int, int),
                std::vector<int> (*mutation)(std::vector<int>, int, int),
                int count);
@@ -63,7 +63,7 @@ public:
     int getMax() const { return max; }
 
     // Functions
-    int (*function)(int);
+    long int (*function) (long int);
     std::vector<int> (*cross)(std::vector<int>, int, int);
     std::vector<int> (*mutation)(std::vector<int>, int, int);
 
