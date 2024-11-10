@@ -5,7 +5,7 @@
 #include "FunctionGenetic.h"
 #include "Randomizer.h"
 
-#define BIT_SIZE 16
+#define BIT_SIZE 20
 
 std::vector<int> mutationRandomBit(std::vector<int> values, int min, int max)
 {

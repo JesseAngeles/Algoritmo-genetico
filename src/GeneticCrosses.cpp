@@ -5,7 +5,7 @@
 #include "FunctionGenetic.h"
 #include "Randomizer.h"
 
-#define BIT_SIZE 16
+#define BIT_SIZE 20
 
 // El mejor gen crea parejas con mejores genes
 std::vector<int> crossBestSwitchPair(std::vector<int> values, int min, int max)
@@ -22,7 +22,7 @@ std::vector<int> crossBestSwitchPair(std::vector<int> values, int min, int max)
     {
         std::bitset<BIT_SIZE> best = best_value;
         std::bitset<BIT_SIZE> value(values[i]);
-        const int num_bits = random(0, max_bit);
+        const int num_bits = random(0, max_bit + 1);
 
         for (int j = 0; j < num_bits; j++)
         {
