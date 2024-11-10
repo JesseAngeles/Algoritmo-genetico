@@ -3,6 +3,20 @@
 
 #include <random>
 
-float random(float min, float max);
+class Randomizer
+{
+private:
+    std::random_device rd; // Dispositivo aleatorio para la semilla
+    std::mt19937 engine;   // Motor de generación aleatoria (Mersenne Twister)
+
+public:
+    Randomizer();
+    float generate(float min, float max);
+
+    // Getters
+    std::mt19937 &getEngine() { return engine; }
+};
+
+float generate(float min, float max);
 
 #endif // RANDOMIZER_H

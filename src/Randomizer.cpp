@@ -1,10 +1,11 @@
 #include "Randomizer.h"
 
-float random(float min, float max)
-{
-    std::random_device rd;                 
-    std::mt19937 gen(rd());                  
-    std::uniform_real_distribution<float> distr(min, max); 
+Randomizer::Randomizer()
+    : engine(rd()) {}
 
-    return distr(gen);
+float Randomizer::generate(float min, float max)
+{
+    std::uniform_real_distribution<float> distribution(min, max);
+    
+    return distribution(engine);
 }
