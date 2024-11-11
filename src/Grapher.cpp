@@ -70,14 +70,13 @@ void ::Grapher::drawCircle(float x, float y, float radius, Color color)
     this->circles.push_back(circle);
 }
 
-int Grapher::draw(float factor, int count)
+int Grapher::draw(float factor)
 {
     float speed = factor * 500;
     float seconds = 0.05f; // Tiempo inicial para el primer mensaje
     float time = 5.0f;     // Tiempo límite para cerrar la ventana
 
     Clock clock;
-    Texture texture;
 
     while (window.isOpen())
     {
@@ -106,13 +105,7 @@ int Grapher::draw(float factor, int count)
 
         // Cerrar la ventana si han pasado más de `time` segundos
         if (deltaTime > 3.0f)
-        {
-            texture.create(window.getSize().x, window.getSize().y);
-            texture.update(window);
-            texture.copyToImage().saveToFile("images/" + std::to_string(count) + ".png");
-
             window.close();
-        }
 
         window.clear(background);
 

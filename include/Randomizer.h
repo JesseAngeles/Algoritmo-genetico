@@ -17,6 +17,4 @@ public:
     std::mt19937 &getEngine() { return engine; }
 };
 
-float generate(float min, float max);
-
 #endif // RANDOMIZER_H

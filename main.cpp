@@ -14,38 +14,46 @@ using namespace std;
 
 std::vector<int> createInitPopulation(int size, int min, int max);
 
-int main(int argc, char *argv[])
+int main()
 {
     int size = 10;
     int min = 0;
     int max = 100000;
     float probabily_mutation = 0.01;
 
-    std::vector<int> initPopulation = createInitPopulation(size, min, max);
-    // std::vector<int> initPopulation = {13, 24, 8, 19};
+    for (int i = 0; i < 5; ++i) {
+        std::vector<int> initPopulation = createInitPopulation(size, min, max);
+        // std::vector<int> initPopulation = {13, 24, 8, 19};
 
-    Generation generation(initPopulation,
-                          min, max, probabily_mutation,
-                          functionSquare,
-                          rouletteWheelSelection,
-                          twoPointCrossover,
-                          pointMutation);
+        Generation generation(initPopulation,
+                              min, max, probabily_mutation,
+                              functionSquare,
+                              rankSelection,
+                              singlePointCrossover,
+                              pointMutation);
 
-    generation.printPopulation(generation.getPopulation());
+        std::cout << "Iteración " << (i + 1) << ":\n";
+        
+        std::cout << "Población Inicial:";
+        generation.printPopulation(generation.getPopulation());
 
-    int error_data = generation.start(false);
-    
-    cout << "\nAjustes: " << error_data << "\n";
-    cout << "\nTotal: " << generation.getGenerationCount() << "\n";
-    
-    cout << "\nFinal:";
-    generation.printPopulation(generation.getPopulation());
-    
-    cout << "\nBest:";
-    generation.printPopulation(generation.getMaxPopulation());
+        int error_data = generation.start(false);
+        
+        std::cout << "Ajustes: " << error_data << "\n";
+        std::cout << "Total: " << generation.getGenerationCount() << "\n";
+        
+        std::cout << "Población Final:";
+        generation.printPopulation(generation.getPopulation());
+        
+        std::cout << "Mejor Población:";
+        generation.printPopulation(generation.getMaxPopulation());
+
+        std::cout << "----------------------------------------\n";
+    }
 
     return 0;
 }
+
 
 std::vector<int> createInitPopulation(int size, int min, int max)
 {

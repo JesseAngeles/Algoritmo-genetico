@@ -6,6 +6,9 @@
 #include <vector>
 #include <algorithm>
 
+
+#include <iostream>
+
 #include "Randomizer.h"
 #include "Grapher.h"
 

@@ -43,7 +43,7 @@ public:
     void drawDivisor(float angle, float value);
     void drawCircle(float x, float y, float radius, Color color);
     void moveLines(float angle);
-    int draw(float factor, int count);
+    int draw(float factor);
     int getAngle();
 
     // Getters

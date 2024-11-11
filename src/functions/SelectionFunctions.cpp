@@ -3,8 +3,11 @@
 #include <cmath>
 #include <algorithm>
 
+#include <iostream>
+
 #include "Randomizer.h"
 #include "Binary.h"
+#include "Grapher.h"
 
 void rouletteWheelSelection(std::vector<int> &population, const std::vector<long> &fitnesses)
 {
@@ -15,7 +18,6 @@ void rouletteWheelSelection(std::vector<int> &population, const std::vector<long
     float total_fitness = 0;
     for (long fitness : fitnesses)
         total_fitness += fitness;
-
     // Calcular probabilidad de seleccion
     std::vector<float> probabilities;
     probabilities.reserve(fitnesses.size());
@@ -37,6 +39,54 @@ void rouletteWheelSelection(std::vector<int> &population, const std::vector<long
     for (int i = 0; i < population.size(); i++)
     {
         float random_number = randomizer.generate(0, 1);
+        for (int j = 0; j < probabilities.size(); j++)
+            if (random_number <= probabilities[j])
+            {
+                new_population.push_back(population[j]);
+                break;
+            }
+    }
+
+    // Reasignacion
+    population = new_population;
+}
+
+void rouletteWheelSelectionAnimated(std::vector<int> &population, const std::vector<long> &fitnesses)
+{
+    // Randomizador
+    Randomizer randomizer;
+
+    // Calcular la aptitud total
+    float total_fitness = 0;
+    for (long fitness : fitnesses)
+        total_fitness += fitness;
+    // Calcular probabilidad de seleccion
+    std::vector<float> probabilities;
+    probabilities.reserve(fitnesses.size());
+
+    for (long fitness : fitnesses)
+        probabilities.push_back(fitness / total_fitness);
+
+    // Calcular probabilidad acumulada
+    float sum = 0;
+    for (float &prob : probabilities)
+    {
+        sum += prob;
+        prob = sum;
+    }
+
+    // Seleccion
+    std::vector<int> new_population;
+
+    for (int i = 0; i < population.size(); i++)
+    {
+        float random_number = randomizer.generate(2, 5);
+        
+        Grapher grapher;
+        for (int i = 0; i < population.size(); i++)
+            grapher.drawDivisor(probabilities[i] * 2 * M_PI, population[i]);
+        int index = grapher.draw(random_number);
+
         for (int j = 0; j < probabilities.size(); j++)
             if (random_number <= probabilities[j])
             {
@@ -81,9 +131,6 @@ void rankSelection(std::vector<int> &population, const std::vector<long> &fitnes
 {
     // Randomizador
     Randomizer randomizer;
-    
-    std::vector<int> order_population;
-    std::vector<long> order_fitness = fitnesses;
 
     // Ordenamiento
     std::vector<int> indexes(fitnesses.size());
@@ -94,13 +141,15 @@ void rankSelection(std::vector<int> &population, const std::vector<long> &fitnes
                   return fitnesses[i1] > fitnesses[i2];
               });
 
-    // Clasificacion
-    float total_ranking = population.size() * (population.size() + 1) / 2;
+    // Clasificación
+    float total_ranking = population.size() * (population.size() + 1) / 2.0f;
 
-    // Calcular probabilidad de seleccion
+    // Calcular probabilidad de selección
     std::vector<float> probabilities;
-    for (int index : indexes)
-        probabilities.push_back(index / total_ranking);
+    probabilities.reserve(indexes.size());
+
+    for (int i = 0; i < indexes.size(); ++i)
+        probabilities.push_back((i + 1) / total_ranking);
 
     // Calcular probabilidad acumulada
     float sum = 0;
@@ -109,20 +158,24 @@ void rankSelection(std::vector<int> &population, const std::vector<long> &fitnes
         sum += prob;
         prob = sum;
     }
-    // Seleccion
+
+    // Selección
     std::vector<int> new_population;
+    new_population.reserve(population.size());
 
     for (int i = 0; i < population.size(); i++)
     {
         float random_number = randomizer.generate(0, 1);
         for (int j = 0; j < probabilities.size(); j++)
+        {
             if (random_number <= probabilities[j])
             {
-                new_population.push_back(population[j]);
+                new_population.push_back(population[indexes[j]]);
                 break;
             }
+        }
     }
 
-    // Reasignacion
+    // Reasignación
     population = new_population;
 }

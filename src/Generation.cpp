@@ -75,11 +75,13 @@ bool Generation::isMaximized()
 
 long Generation::ratePopulation(std::vector<int> population)
 {
-    long total = 0;
-    for (int organism : population)
-        total += organism;
+    std::vector<long> fitnesses;
+    fitnesses.reserve(population.size());
 
-    return total; // static_cast<double>(total) / population.size();
+    for (int organism : population)
+        fitnesses.push_back(fitness(organism));
+
+    return *std::max_element(fitnesses.begin(), fitnesses.end());
 }
 
 int Generation::start(bool printPoblation)
@@ -98,6 +100,7 @@ int Generation::start(bool printPoblation)
             max_population = population;
             break;
         }
+
         if (probabilty_mutation > MAX_PROBABILITY_MUTATION)
             probabilty_mutation = MAX_PROBABILITY_MUTATION;
 
@@ -122,8 +125,8 @@ int Generation::start(bool printPoblation)
             probabilty_mutation = init_probability;
 
         // Evaluar la calidad
-        int rate_previous = ratePopulation(previous_population);
-        int rate_current = ratePopulation(population) * 1.05;
+        long rate_previous = ratePopulation(previous_population);
+        long rate_current = ratePopulation(population) * 1.05;
 
         // Si la nueva población no mejora
         if (rate_previous >= rate_current)
@@ -147,6 +150,7 @@ int Generation::start(bool printPoblation)
         if (printPoblation)
             printPopulation(population);
 
+        generation_count++;
     } while (++generation_count < 100000 && no_improvement_count < MAX_NO_IMPROVEMENT);
 
     probabilty_mutation = init_probability;
@@ -156,7 +160,7 @@ int Generation::start(bool printPoblation)
 
 void Generation::printPopulation(std::vector<int> population)
 {
-    std::cout << std::endl;
     for (const int &organism : population)
         std::cout << organism << " ";
+    std::cout << std::endl;
 }
